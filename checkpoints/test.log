@@ -1,0 +1,18 @@
+[2019-10-12 15:41:54,200] INFO:dc_log:==> Training Epoch 1,                     
+Loss: 2.368464708328247,                     
+Accuracy: 0.232
+[2019-10-12 15:41:54,205] INFO:dc_log:==> Dev Epoch 1,                     
+Loss: 1.95901620388031,                     
+Accuracy: 0.25
+[2019-10-12 15:41:54,209] INFO:dc_log:==> Test Epoch 1,                     
+Loss: 1.9300451278686523,                     
+Accuracy: 0.23
+[2019-10-12 15:42:32,211] INFO:dc_log:==> Training Epoch 2,                     
+Loss: 2.263821601867676,                     
+Accuracy: 0.284
+[2019-10-12 15:42:32,217] INFO:dc_log:==> Dev Epoch 2,                     
+Loss: 1.8884897232055664,                     
+Accuracy: 0.26
+[2019-10-12 15:42:32,219] INFO:dc_log:==> Test Epoch 2,                     
+Loss: 1.8227512836456299,                     
+Accuracy: 0.29
