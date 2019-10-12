@@ -1,0 +1,8 @@
+checkpoints/*
+data/MNIST/*
+data/__MACOSX/*
+data/test/*
+data/train/*
+data/val/*
+data/data.zip
+__pychache__/*
