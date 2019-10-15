@@ -10,15 +10,15 @@ def parse_args():
 
     parser.add_argument('--save', default='checkpoints/',
                         help='directory to save checkpoints')
-    parser.add_argument('--expname', type=str, default='test',
-                        help='Name to identify experiment')
+
+
     parser.add_argument('--expno', type=int, default=0,
                         help='Experiment number')
-    # model arguments
-    parser.add_argument('--input_dim', default=300, type=int,
-                        help='Size of input word vector')
-
+    parser.add_argument('--expname', type=str, default='vgg16',
+                        help='Name to identify experiment')
     parser.add_argument('--pretrained_model', default='vgg16',
+                        help='Pretrained model')
+    parser.add_argument('--pretrained_holistic', type=int, default=1,
                         help='Pretrained model')
 
     parser.add_argument('--num_classes', default=16, type=int,
@@ -28,7 +28,7 @@ def parse_args():
     parser.add_argument('--epochs', default=1000, type=int,
                         help='number of total epochs to run')
 
-    parser.add_argument('--batchsize', default=32, type=int,
+    parser.add_argument('--batchsize', default=2, type=int,
                         help='batchsize for optimizer updates')
 
     parser.add_argument('--lr', default=0.001, type=float,
