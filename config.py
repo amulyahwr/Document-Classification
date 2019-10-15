@@ -18,7 +18,7 @@ def parse_args():
                         help='Name to identify experiment')
     parser.add_argument('--pretrained_model', default='vgg16',
                         help='Pretrained model')
-    parser.add_argument('--pretrained_holistic', type=int, default=1,
+    parser.add_argument('--pretrained_holistic', type=int, default=0,
                         help='Pretrained model')
 
     parser.add_argument('--num_classes', default=16, type=int,
