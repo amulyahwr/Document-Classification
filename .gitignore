@@ -6,4 +6,5 @@ data/test/*
 data/train/*
 data/val/*
 data/data.zip
+.ipynb_checkpoints/*
 __pychache__/*

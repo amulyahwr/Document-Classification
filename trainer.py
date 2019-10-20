@@ -24,10 +24,12 @@ class Trainer(object):
             batch_holistic = batch_holistic.cuda()
 
         labels = labels.long()
+#         print('batch_holistic.shape:',batch_holistic.shape)
         batch_holistic = torch.unsqueeze(batch_holistic, dim=1).repeat(1,3,1,1).float()
-
+#         print('batch_holistic.shape:',batch_holistic.shape)
         output = self.model(batch_holistic)
 
+#         print(labels)
         loss = self.criterion(output, labels)
 
         (loss/self.args.batchsize).backward()

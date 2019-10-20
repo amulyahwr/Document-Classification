@@ -78,8 +78,9 @@ def copydata(path, dst, labels):
         #     y.append(int(label.split(' ')[1].rstrip()))
 
         X = np.array(data['filenames'])
-        y = np.array(data['labels'])
-
+#         y = np.array(data['labels'])
+        y = []
+        filenames = []
         if not os.path.exists(dst+'holistic/'):
             os.makedirs(dst+'holistic/')
         if not os.path.exists(dst+'header/'):
@@ -95,24 +96,23 @@ def copydata(path, dst, labels):
         for image in tqdm(X, desc="Writing Tensors.."):
             old_path = os.path.join(orig_images_path,image)
             try:
+                
                 holistic, header, footer, left_body, right_body = preprocess_image(old_path)
                 holistic.save(dst+'holistic/%d.jpg'%(count))
                 header.save(dst+'header/%d.jpg'%(count))
                 footer.save(dst+'footer/%d.jpg'%(count))
                 left_body.save(dst+'left_body/%d.jpg'%(count))
                 right_body.save(dst+'right_body/%d.jpg'%(count))
-
-                # torch.save(holistic, dst+'holistic/%d.pt'%(count))
-                # torch.save(header, dst+'header/%d.pt'%(count))
-                # torch.save(footer, dst+'footer/%d.pt'%(count))
-                # torch.save(left_body, dst+'left_body/%d.pt'%(count))
-                # torch.save(right_body, dst+'right_body/%d.pt'%(count))
+                filenames.append(dst.replace('..','')+'holistic/%d.jpg'%(count))
+                y.append(data[data['filenames']==image]['labels'].values[0])
+              
+                count = count + 1
             except Exception as ex:
                 print('Error:',ex)
                 pass
-            count = count + 1
+            
 
-        filenames = np.array(sorted(glob.glob(dst+'holistic/*.jpg')))
+#         filenames = np.array(sorted(glob.glob(dst+'holistic/*.jpg')))
 
         df = pd.DataFrame(columns=['filenames','labels'])
         df['filenames'] = filenames
@@ -128,5 +128,5 @@ def copydata(path, dst, labels):
         print('Dataset size: %d'%(len(X)))
 
 copydata(orig_train_labels_path, '../train/','train.csv')
-copydata(orig_val_labels_path, '../val/','val.csv')
+# copydata(orig_val_labels_path, '../val/','val.csv')
 copydata(orig_test_labels_path, '../test/','test.csv')
