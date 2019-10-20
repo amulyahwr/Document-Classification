@@ -1,23 +1,23 @@
 import os
 import shutil
 import numpy as np
-from sklearn.model_selection import StratifiedShuffleSplit
 from tqdm import tqdm
 from PIL import Image
 import torch
 from sklearn import preprocessing
+import pandas as pd
 
-sss_train = StratifiedShuffleSplit(n_splits=1, test_size=0.003125, random_state=0)
-sss_val = StratifiedShuffleSplit(n_splits=1, test_size=0.0025, random_state=0)
-sss_test = StratifiedShuffleSplit(n_splits=1, test_size=0.0025, random_state=0)
-#copy first 1000 train data
+orig_images_path = '../stratified/rvl-cdip/images/'
+orig_train_labels_path = '../stratified/rvl-cdip/labels/train.csv'
+orig_val_labels_path = '../stratified/rvl-cdip/labels/val.csv'
+orig_test_labels_path = '../stratified/rvl-cdip/labels/test.csv'
 
 def preprocess_image(image):
-  
+
     im = Image.open(image) # 375x500 # wxh
 #     im = im.resize((600, 780)) #width = 600, height =780
-    
-        
+
+
     holistic = np.array(im) # 500x375 # hxw #extracted regions as per: https://arxiv.org/pdf/1502.07058.pdf
     header = holistic[:(256*500)//780,:]
     footer = holistic[(524*500)//780:,:]
@@ -65,16 +65,18 @@ def preprocess_image(image):
     return holistic, header, footer, left_body, right_body
 
 
-def copydata(path, sss, dst, labels):
-    with open(path,'rU') as label_file:
-        X = []
-        y = []
-        for label in label_file.readlines():
-            X.append(label.split(' ')[0])
-            y.append(int(label.split(' ')[1].rstrip()))
+def copydata(path, dst, labels):
+    #with open(path,'rU') as label_file:
+        data = pd.read_csv(path, names=['filenames','labels'],sep=' ')
 
-        X = np.array(X)
-        y = np.array(y)
+        # X = []
+        # y = []
+        # for label in label_file.readlines():
+        #     X.append(label.split(' ')[0])
+        #     y.append(int(label.split(' ')[1].rstrip()))
+
+        X = np.array(data['filenames'])
+        y = np.array(data['labels'])
 
         if not os.path.exists(dst+'holistic/'):
             os.makedirs(dst+'holistic/')
@@ -82,19 +84,14 @@ def copydata(path, sss, dst, labels):
             os.makedirs(dst+'header/')
         if not os.path.exists(dst+'footer/'):
             os.makedirs(dst+'footer/')
-            
         if not os.path.exists(dst+'left_body/'):
             os.makedirs(dst+'left_body/')
         if not os.path.exists(dst+'right_body/'):
             os.makedirs(dst+'right_body/')
-                              
-#         for train_index, test_index in sss.split(X, y):
-#             X_train, X_test = X[train_index], X[test_index]
-#             y_train, y_test = y[train_index], y[test_index]
 
         count = 0
         for image in tqdm(X, desc="Writing Tensors.."):
-            old_path = os.path.join('../../stratified/rvl-cdip/images/',image)
+            old_path = os.path.join(orig_images_path,image)
             try:
                 holistic, header, footer, left_body, right_body = preprocess_image(old_path)
 
@@ -109,14 +106,14 @@ def copydata(path, sss, dst, labels):
             count = count + 1
 
         y = torch.from_numpy(y)
-        torch.save(y, './labels/'+labels)
-        # y_test = map(str, y_test)
-        # y_test = '\n'.join(y_test)
-        # with open('./labels/'+labels,'w') as write_labels:
-        #     write_labels.write(y_test)
 
-        print('Dataset size: %d'%(len(X_test)))
+        if not os.path.exists('../labels'):
+            os.makedirs('../labels')
 
-copydata('../../stratified/rvl-cdip/labels/train.csv', sss_train, './train/','train.pt')
-copydata('../../stratified/rvl-cdip/labels/val.csv', sss_val, './val/','val.pt')
-copydata('../../stratified/rvl-cdip/labels/test.csv', sss_test, './test/','test.pt')
+        torch.save(y, '../labels/'+labels)
+
+        print('Dataset size: %d'%(len(X)))
+
+copydata(orig_train_labels_path, '../train/','train.pt')
+copydata(orig_val_labels_path, '../val/','val.pt')
+copydata(orig_test_labels_path, '../test/','test.pt')
