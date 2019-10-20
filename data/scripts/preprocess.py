@@ -127,6 +127,6 @@ def copydata(path, dst, labels):
 
         print('Dataset size: %d'%(len(X)))
 
-copydata(orig_train_labels_path, '../train/','train.pt')
+copydata(orig_train_labels_path, '../train/','train.csv')
 copydata(orig_val_labels_path, '../val/','val.csv')
-copydata(orig_test_labels_path, '../test/','test.pt')
+copydata(orig_test_labels_path, '../test/','test.csv')
