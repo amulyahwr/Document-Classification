@@ -13,16 +13,14 @@ sss_test = StratifiedShuffleSplit(n_splits=1, test_size=0.0025, random_state=0)
 #copy first 1000 train data
 
 def preprocess_image(image):
-  
-    im = Image.open(image) # 375x500 # wxh
-#     im = im.resize((600, 780)) #width = 600, height =780
-    
-        
-    holistic = np.array(im) # 500x375 # hxw #extracted regions as per: https://arxiv.org/pdf/1502.07058.pdf
-    header = holistic[:(256*500)//780,:]
-    footer = holistic[(524*500)//780:,:]
-    left_body = holistic[(190*500)//780:(590*500)//780,:(300*375)//600]
-    right_body = holistic[(190*500)//780:(590*500)//780,(300*375)//600:]
+    im = Image.open(image)
+    im = im.resize((600, 780)) #width = 600, height =780
+
+    holistic = np.array(im) #extracted regions as per: https://arxiv.org/pdf/1502.07058.pdf
+    header = holistic[:256,:]
+    footer = holistic[524:,:]
+    left_body = holistic[190:590,:300]
+    right_body = holistic[190:590,300:]
 
     #resizing as per: https://arxiv.org/pdf/1801.09321v3.pdf
     holistic = Image.fromarray(holistic).resize((224, 224))
@@ -76,40 +74,24 @@ def copydata(path, sss, dst, labels):
         X = np.array(X)
         y = np.array(y)
 
-        if not os.path.exists(dst+'holistic/'):
-            os.makedirs(dst+'holistic/')
-        if not os.path.exists(dst+'header/'):
-            os.makedirs(dst+'header/')
-        if not os.path.exists(dst+'footer/'):
-            os.makedirs(dst+'footer/')
-            
-        if not os.path.exists(dst+'left_body/'):
-            os.makedirs(dst+'left_body/')
-        if not os.path.exists(dst+'right_body/'):
-            os.makedirs(dst+'right_body/')
-                              
-#         for train_index, test_index in sss.split(X, y):
-#             X_train, X_test = X[train_index], X[test_index]
-#             y_train, y_test = y[train_index], y[test_index]
+        for train_index, test_index in sss.split(X, y):
+            X_train, X_test = X[train_index], X[test_index]
+            y_train, y_test = y[train_index], y[test_index]
 
         count = 0
-        for image in tqdm(X, desc="Writing Tensors.."):
-            old_path = os.path.join('../../stratified/rvl-cdip/images/',image)
-            try:
-                holistic, header, footer, left_body, right_body = preprocess_image(old_path)
+        for image in tqdm(X_test, desc="Writing Tensors.."):
+            old_path = '/Volumes/My Passport/rvl-cdip/images/'+image
+            holistic, header, footer, left_body, right_body = preprocess_image(old_path)
 
-                torch.save(holistic, dst+'holistic/%d.pt'%(count))
-                torch.save(header, dst+'header/%d.pt'%(count))
-                torch.save(footer, dst+'footer/%d.pt'%(count))
-                torch.save(left_body, dst+'left_body/%d.pt'%(count))
-                torch.save(right_body, dst+'right_body/%d.pt'%(count))
-            except Exception as ex:
-                print('Error:',ex)
-                pass
+            torch.save(holistic, dst+'holistic/%d.pt'%(count))
+            torch.save(header, dst+'header/%d.pt'%(count))
+            torch.save(footer, dst+'footer/%d.pt'%(count))
+            torch.save(left_body, dst+'left_body/%d.pt'%(count))
+            torch.save(right_body, dst+'right_body/%d.pt'%(count))
             count = count + 1
 
-        y = torch.from_numpy(y)
-        torch.save(y, './labels/'+labels)
+        y_test = torch.from_numpy(y_test)
+        torch.save(y_test, './labels/'+labels)
         # y_test = map(str, y_test)
         # y_test = '\n'.join(y_test)
         # with open('./labels/'+labels,'w') as write_labels:
@@ -117,6 +99,6 @@ def copydata(path, sss, dst, labels):
 
         print('Dataset size: %d'%(len(X_test)))
 
-copydata('../../stratified/rvl-cdip/labels/train.csv', sss_train, './train/','train.pt')
-copydata('../../stratified/rvl-cdip/labels/val.csv', sss_val, './val/','val.pt')
-copydata('../../stratified/rvl-cdip/labels/test.csv', sss_test, './test/','test.pt')
+copydata('/Volumes/My Passport/rvl-cdip/labels/train.txt', sss_train, './train/','train.pt')
+copydata('/Volumes/My Passport/rvl-cdip/labels/val.txt', sss_val, './val/','val.pt')
+copydata('/Volumes/My Passport/rvl-cdip/labels/test.txt', sss_test, './test/','test.pt')
