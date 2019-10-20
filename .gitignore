@@ -1,6 +1,7 @@
 checkpoints/*
-data/MNIST/*
-data/__MACOSX/*
+data/labels/*
+data/stratified.zip
+data/stratified/*
 data/test/*
 data/train/*
 data/val/*
