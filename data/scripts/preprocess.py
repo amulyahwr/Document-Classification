@@ -106,11 +106,11 @@ def copydata(path, dst, labels):
                 filenames.append(dst.replace('..','')+'holistic/%d.jpg'%(count))
                 y.append(data[data['filenames']==image]['labels'].values[0])
               
-                count = count + 1
+                
             except Exception as ex:
                 print('Error:',ex)
-                pass
-            
+                continue
+            count = count + 1
 
 #         filenames = np.array(sorted(glob.glob(dst+'holistic/*.jpg')))
 
@@ -127,6 +127,6 @@ def copydata(path, dst, labels):
 
         print('Dataset size: %d'%(len(X)))
 
-copydata(orig_train_labels_path, '../train/','train.csv')
+# copydata(orig_train_labels_path, '../train/','train.csv')
 # copydata(orig_val_labels_path, '../val/','val.csv')
 copydata(orig_test_labels_path, '../test/','test.csv')

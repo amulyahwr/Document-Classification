@@ -37,7 +37,7 @@ class Dataset(data.Dataset):
         filename = os.path.join(self.data_container,self.dataset_path)
 #         print('filename:',filename)
         for idx in lst_index:
-           
+            
      
             holistic_filename = os.path.join(filename,'holistic/%d.jpg'%(idx))
 #             print('holistic_filename:',holistic_filename)
@@ -49,15 +49,20 @@ class Dataset(data.Dataset):
             filename_matcher = '/'+os.path.join(self.dataset_path,'holistic/%d.jpg'%(idx))
             
 #             print('filename_matcher:',filename_matcher)
-#             print(self.df_labels[self.df_labels['filenames']==filename_matcher]['labels'].values[0])
-            
-            y_arr.append(self.df_labels[self.df_labels['filenames']==filename_matcher]['labels'].values[0])
-            
-            holistic = np.array(Image.open(holistic_filename))
-            header = np.array(Image.open(header_filename))
-            footer = np.array(Image.open(footer_filename))
-            left_body = np.array(Image.open(left_body_filename))
-            right_body = np.array(Image.open(right_body_filename))
+            matched_value = self.df_labels[self.df_labels['filenames']==filename_matcher]['labels']
+    
+            try:
+                y_arr.append(matched_value.values[0])
+            except Exception as ex:                
+                print('matched_value:', matched_value, 'filename_matcher:',filename_matcher)
+                print('Error:',ex)
+                continue
+                
+            holistic = np.array(Image.open(holistic_filename, mode='r'))
+            header = np.array(Image.open(header_filename, mode='r'))
+            footer = np.array(Image.open(footer_filename, mode='r'))
+            left_body = np.array(Image.open(left_body_filename, mode='r'))
+            right_body = np.array(Image.open(right_body_filename, mode='r'))
 
 #             holistic = torch.unsqueeze(holistic, dim=0)
             holistic_lst.append(holistic)
@@ -76,19 +81,23 @@ class Dataset(data.Dataset):
 
 
 #             labels.append(torch.unsqueeze(self.labels[idx],dim=0))
-        if 'vgg' in self.model_type:  
-            holistic = torch.from_numpy((np.array(holistic_lst)-127.5)/127.5)
-            header = torch.from_numpy((np.array(header_lst)-127.5)/127.5)
-            footer = torch.from_numpy((np.array(footer_lst)-127.5)/127.5)
-            left_body = torch.from_numpy((np.array(left_body_lst)-127.5)/127.5)
-            right_body = torch.from_numpy((np.array(right_body_lst)-127.5)/127.5)
-        else:
-            holistic = torch.from_numpy(np.array(holistic_lst)/255.0)
-            header = torch.from_numpy(np.array(header_lst)/255.0)
-            footer = torch.from_numpy(np.array(footer_lst)/255.0)
-            left_body = torch.from_numpy(np.array(left_body_lst)/255.0)
-            right_body = torch.from_numpy(np.array(right_body_lst)/255.0)
-
+        try:
+            
+            if 'vgg' in self.model_type:  
+                holistic = torch.from_numpy((np.array(holistic_lst)-127.5)/127.5)
+                header = torch.from_numpy((np.array(header_lst)-127.5)/127.5)
+                footer = torch.from_numpy((np.array(footer_lst)-127.5)/127.5)
+                left_body = torch.from_numpy((np.array(left_body_lst)-127.5)/127.5)
+                right_body = torch.from_numpy((np.array(right_body_lst)-127.5)/127.5)
+            else:
+                holistic = torch.from_numpy(np.array(holistic_lst)/255.0)
+                header = torch.from_numpy(np.array(header_lst)/255.0)
+                footer = torch.from_numpy(np.array(footer_lst)/255.0)
+                left_body = torch.from_numpy(np.array(left_body_lst)/255.0)
+                right_body = torch.from_numpy(np.array(right_body_lst)/255.0)
+        except Exception as ex:
+            print('Error:',ex)
+            
         labels = torch.from_numpy(np.array(y_arr))
 
         return holistic, header, footer, left_body, right_body, labels
