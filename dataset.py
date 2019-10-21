@@ -6,14 +6,14 @@ from PIL import Image
 import pandas as pd
 import numpy as np
 class Dataset(data.Dataset):
-    def __init__(self, labels_path, dataset_path, lst_files):
+    def __init__(self, labels_path, dataset_path, lst_files, model_type):
         super(Dataset, self).__init__()
         
         self.lst_files = lst_files
         self.dataset_path = dataset_path
         self.labels_path = labels_path
         self.data_container = 'data'
-        
+        self.model_type  = model_type
 #         self.label_path = dataset_path.split('/')
 #         self.label_path.insert(2,'labels')
 #         self.label_path = '/'.join(self.label_path) + '.pt'
@@ -76,12 +76,18 @@ class Dataset(data.Dataset):
 
 
 #             labels.append(torch.unsqueeze(self.labels[idx],dim=0))
-            
-        holistic = torch.from_numpy(np.array(holistic_lst))
-        header = torch.from_numpy(np.array(header_lst))
-        footer = torch.from_numpy(np.array(footer_lst))
-        left_body = torch.from_numpy(np.array(left_body_lst))
-        right_body = torch.from_numpy(np.array(right_body_lst))
+        if 'vgg' in self.model_type:  
+            holistic = torch.from_numpy((np.array(holistic_lst)-127.5)/127.5)
+            header = torch.from_numpy((np.array(header_lst)-127.5)/127.5)
+            footer = torch.from_numpy((np.array(footer_lst)-127.5)/127.5)
+            left_body = torch.from_numpy((np.array(left_body_lst)-127.5)/127.5)
+            right_body = torch.from_numpy((np.array(right_body_lst)-127.5)/127.5)
+        else:
+            holistic = torch.from_numpy(np.array(holistic_lst)/255.0)
+            header = torch.from_numpy(np.array(header_lst)/255.0)
+            footer = torch.from_numpy(np.array(footer_lst)/255.0)
+            left_body = torch.from_numpy(np.array(left_body_lst)/255.0)
+            right_body = torch.from_numpy(np.array(right_body_lst)/255.0)
 
         labels = torch.from_numpy(np.array(y_arr))
 
