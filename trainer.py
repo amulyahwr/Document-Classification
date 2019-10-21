@@ -32,7 +32,7 @@ class Trainer(object):
 #         print(labels)
         loss = self.criterion(output, labels)
 
-        (loss/self.args.batchsize).backward()
+        (loss).backward()
         self.optimizer.step()
         self.optimizer.zero_grad()
 

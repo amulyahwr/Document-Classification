@@ -96,7 +96,7 @@ def copydata(path, dst, labels):
         for image in tqdm(X, desc="Writing Tensors.."):
             old_path = os.path.join(orig_images_path,image)
             try:
-                
+
                 holistic, header, footer, left_body, right_body = preprocess_image(old_path)
                 holistic.save(dst+'holistic/%d.jpg'%(count))
                 header.save(dst+'header/%d.jpg'%(count))
@@ -105,8 +105,8 @@ def copydata(path, dst, labels):
                 right_body.save(dst+'right_body/%d.jpg'%(count))
                 filenames.append(dst.replace('..','')+'holistic/%d.jpg'%(count))
                 y.append(data[data['filenames']==image]['labels'].values[0])
-              
-                
+
+
             except Exception as ex:
                 print('Error:',ex)
                 continue
@@ -127,6 +127,6 @@ def copydata(path, dst, labels):
 
         print('Dataset size: %d'%(len(X)))
 
-# copydata(orig_train_labels_path, '../train/','train.csv')
-# copydata(orig_val_labels_path, '../val/','val.csv')
+copydata(orig_train_labels_path, '../train/','train.csv')
+copydata(orig_val_labels_path, '../val/','val.csv')
 copydata(orig_test_labels_path, '../test/','test.csv')
