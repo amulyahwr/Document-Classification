@@ -30,13 +30,14 @@ class DocClassificationRest(nn.Module):
         self.output = nn.Linear(256, 16)
 
     def forward(self, batch_holistic, batch_header, batch_footer, batch_left_body, batch_right_body):
-        output_holistic = torch.softmax(self.pretrained_vgg16(batch_holistic), dim=1)
-        output_header = torch.softmax(self.pretrained_holistic(batch_header), dim=1)
-        output_footer = torch.softmax(self.pretrained_holistic(batch_footer), dim=1)
-        output_left_body = torch.softmax(self.pretrained_holistic(batch_left_body), dim=1)
-        output_right_body = torch.softmax(self.pretrained_holistic(batch_right_body), dim=1)
+        output_holistic = self.pretrained_vgg16(batch_holistic)
+        output_header = self.pretrained_holistic(batch_header)
+        output_footer = self.pretrained_holistic(batch_footer)
+        output_left_body = self.pretrained_holistic(batch_left_body)
+        output_right_body = self.pretrained_holistic(batch_right_body)
 
-        output_all = torch.cat((output_holistic, output_header, output_footer, output_left_body, output_right_body), dim=1)
+        output_all = torch.cat((output_holistic, output_header, output_footer, output_left_body, output_right_body), dim=-1)
+#         print(output_all.shape)
         ff1_out = self.dropout(torch.relu(self.ff1(output_all)))
         ff2_out = self.dropout(torch.relu(self.ff2(ff1_out)))
         output = torch.relu(self.output(ff2_out))
