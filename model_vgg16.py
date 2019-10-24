@@ -22,8 +22,7 @@ class DocClassificationRest(nn.Module):
     def __init__(self, args, pretrained_vgg16, pretrained_holistic_model):
         super(DocClassificationRest, self).__init__()
         self.pretrained_vgg16 = DocClassificationHolistic(args, pretrained_vgg16)
-        self.pretrained_holistic = DocClassificationHolistic(args, pretrained_vgg16)
-        self.pretrained_holistic.load_state_dict(pretrained_holistic_model)
+        self.pretrained_holistic = pretrained_holistic_model
 
         self.dropout = nn.Dropout(p=0.75)
 
