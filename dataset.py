@@ -6,23 +6,21 @@ from PIL import Image
 import pandas as pd
 import numpy as np
 class Dataset(data.Dataset):
-    def __init__(self, labels_path, dataset_path, lst_files, model_type):
+    def __init__(self, labels_path, model_type):
         super(Dataset, self).__init__()
-        
-        self.lst_files = lst_files
-        self.dataset_path = dataset_path
+
         self.labels_path = labels_path
-        self.data_container = 'data'
+        self.data_container = 'data/images'
         self.model_type  = model_type
 #         self.label_path = dataset_path.split('/')
 #         self.label_path.insert(2,'labels')
 #         self.label_path = '/'.join(self.label_path) + '.pt'
 
-        self.df_labels = pd.read_csv(self.labels_path, sep=' ')
+        self.df_dataset = pd.read_csv(self.labels_path, sep=' ', names=['filenames','labels'])
 #         print(self.labels_path, self.dataset_path)
 
     def __len__(self):
-        return len(self.lst_files)
+        return len(self.df_dataset)
 
     def __getitem__(self, lst_index):
         y_arr = []
@@ -33,36 +31,28 @@ class Dataset(data.Dataset):
         right_body_lst = []
         labels = []
         filename = None
-#         print('lst_index:',lst_index)
-        filename = os.path.join(self.data_container,self.dataset_path)
-#         print('filename:',filename)
+
         for idx in lst_index:
-            
-     
-            holistic_filename = os.path.join(filename,'holistic/%d.jpg'%(idx))
-#             print('holistic_filename:',holistic_filename)
-            header_filename = os.path.join(filename,'header/%d.jpg'%(idx))
-            footer_filename = os.path.join(filename,'footer/%d.jpg'%(idx))
-            left_body_filename = os.path.join(filename,'left_body/%d.jpg'%(idx))
-            right_body_filename = os.path.join(filename,'right_body/%d.jpg'%(idx))
-            
-            filename_matcher = '/'+os.path.join(self.dataset_path,'holistic/%d.jpg'%(idx))
-            
-#             print('filename_matcher:',filename_matcher)
-            matched_value = self.df_labels[self.df_labels['filenames']==filename_matcher]['labels']
-    
-            try:
-                y_arr.append(matched_value.values[0])
-            except Exception as ex:                
-                print('matched_value:', matched_value, 'filename_matcher:',filename_matcher)
-                print('Error:',ex)
-                continue
-                
-            holistic = np.array(Image.open(holistic_filename, mode='r'))
-            header = np.array(Image.open(header_filename, mode='r'))
-            footer = np.array(Image.open(footer_filename, mode='r'))
-            left_body = np.array(Image.open(left_body_filename, mode='r'))
-            right_body = np.array(Image.open(right_body_filename, mode='r'))
+            filename = os.path.join(self.data_container, self.df_dataset['filenames'][idx])
+
+            im = Image.open(filename) # 375x500 # wxh
+        #     im = im.resize((600, 780)) #width = 600, height =780
+
+
+            holistic = np.array(im) # 500x375 # hxw #extracted regions as per: https://arxiv.org/pdf/1502.07058.pdf
+            header = holistic[:(256*500)//780,:]
+            footer = holistic[(524*500)//780:,:]
+            left_body = holistic[(190*500)//780:(590*500)//780,:(300*375)//600]
+            right_body = holistic[(190*500)//780:(590*500)//780,(300*375)//600:]
+
+            #resizing as per: https://arxiv.org/pdf/1801.09321v3.pdf
+            holistic = np.array(Image.fromarray(holistic).resize((224, 224)))
+            header = np.array(Image.fromarray(header).resize((224, 224)))
+            footer = np.array(Image.fromarray(footer).resize((224, 224)))
+            left_body = np.array(Image.fromarray(left_body).resize((224, 224)))
+            right_body = np.array(Image.fromarray(right_body).resize((224, 224)))
+
+            y_arr.append(self.df_dataset['labels'][idx])
 
 #             holistic = torch.unsqueeze(holistic, dim=0)
             holistic_lst.append(holistic)
@@ -82,8 +72,8 @@ class Dataset(data.Dataset):
 
 #             labels.append(torch.unsqueeze(self.labels[idx],dim=0))
         try:
-            
-            if 'vgg' in self.model_type:  
+
+            if 'vgg' in self.model_type:
                 holistic = torch.from_numpy((np.array(holistic_lst)-127.5)/127.5)
                 header = torch.from_numpy((np.array(header_lst)-127.5)/127.5)
                 footer = torch.from_numpy((np.array(footer_lst)-127.5)/127.5)
@@ -97,7 +87,7 @@ class Dataset(data.Dataset):
                 right_body = torch.from_numpy(np.array(right_body_lst)/255.0)
         except Exception as ex:
             print('Error:',ex)
-            
+
         labels = torch.from_numpy(np.array(y_arr))
 
         return holistic, header, footer, left_body, right_body, labels
