@@ -10,7 +10,7 @@ class Dataset(data.Dataset):
         super(Dataset, self).__init__()
 
         self.labels_path = labels_path
-        self.data_container = 'data/images'
+        self.data_container = 'data/stratified/rvl-cdip/images/'
         self.model_type  = model_type
 #         self.label_path = dataset_path.split('/')
 #         self.label_path.insert(2,'labels')
@@ -46,11 +46,11 @@ class Dataset(data.Dataset):
             right_body = holistic[(190*500)//780:(590*500)//780,(300*375)//600:]
 
             #resizing as per: https://arxiv.org/pdf/1801.09321v3.pdf
-            holistic = np.array(Image.fromarray(holistic).resize((224, 224)))
-            header = np.array(Image.fromarray(header).resize((224, 224)))
-            footer = np.array(Image.fromarray(footer).resize((224, 224)))
-            left_body = np.array(Image.fromarray(left_body).resize((224, 224)))
-            right_body = np.array(Image.fromarray(right_body).resize((224, 224)))
+#             holistic = np.array(Image.fromarray(holistic).resize((224, 224)))
+#             header = np.array(Image.fromarray(header).resize((224, 224)))
+#             footer = np.array(Image.fromarray(footer).resize((224, 224)))
+#             left_body = np.array(Image.fromarray(left_body).resize((224, 224)))
+#             right_body = np.array(Image.fromarray(right_body).resize((224, 224)))
 
             y_arr.append(self.df_dataset['labels'][idx])
 

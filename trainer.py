@@ -35,9 +35,14 @@ class Trainer(object):
         loss.backward()
         self.optimizer.step()
         self.optimizer.zero_grad()
+        
+        scores = torch.softmax(output, dim=1)
+        predictions = torch.argmax(scores, dim=1)
+        predictions = predictions.cpu().numpy()
+        labels = labels.cpu().numpy()
 
+        return loss, predictions, labels
 
-        return loss
 
     # helper function for testing
     def test_holistic(self, batch_holistic, labels):
@@ -91,8 +96,13 @@ class Trainer(object):
         self.optimizer.step()
         self.optimizer.zero_grad()
 
+        scores = torch.softmax(output, dim=1)
+        predictions = torch.argmax(scores, dim=1)
+        predictions = predictions.cpu().numpy()
+        labels = labels.cpu().numpy()
 
-        return loss
+        return loss, predictions, labels
+
 
     # helper function for testing
     def test_rest(self, batch_holistic, batch_header, batch_footer, batch_left_body, batch_right_body, labels):
