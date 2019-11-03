@@ -7,4 +7,5 @@ data/train/*
 data/val/*
 data/data.zip
 .ipynb_checkpoints/*
+logs/*
 __pychache__/*
