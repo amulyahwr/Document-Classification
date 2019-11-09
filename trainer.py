@@ -293,3 +293,59 @@ class Trainer(object):
             labels = labels.cpu().numpy()
 
         return loss, predictions, labels
+    
+    
+    
+    # helper function for training
+    def train_3D_attention(self, batch_holistic, labels):
+        self.model.train()
+        self.optimizer.zero_grad()
+
+        if self.args.cuda:
+            labels = labels.cuda()
+            batch_holistic = batch_holistic.cuda()
+
+        labels = labels.long()
+#         print('batch_holistic.shape:',batch_holistic.shape)
+        batch_holistic = torch.unsqueeze(batch_holistic, dim=1).repeat(1,3,1,1).float()
+#         print('batch_holistic.shape:',batch_holistic.shape)
+        output, attn_map = self.model(batch_holistic)
+
+#         print(labels)
+        loss = self.criterion(output, labels)
+
+        loss.backward()
+        self.optimizer.step()
+        self.optimizer.zero_grad()
+        
+        scores = torch.softmax(output, dim=1)
+        predictions = torch.argmax(scores, dim=1)
+        predictions = predictions.cpu().numpy()
+        labels = labels.cpu().numpy()
+
+        return loss, predictions, labels, attn_map
+
+
+    # helper function for testing
+    def test_3D_attention(self, batch_holistic, labels):
+        with torch.no_grad():
+            self.model.eval()
+
+            if self.args.cuda:
+                labels = labels.cuda()
+                batch_holistic = batch_holistic.cuda()
+
+            labels = labels.long()
+            batch_holistic = torch.unsqueeze(batch_holistic, dim=1).repeat(1,3,1,1).float()
+
+            output, attn_map = self.model(batch_holistic)
+
+            loss = self.criterion(output, labels)
+
+            scores = torch.softmax(output, dim=1)
+            predictions = torch.argmax(scores, dim=1)
+            predictions = predictions.cpu().numpy()
+            labels = labels.cpu().numpy()
+
+        return loss, predictions, labels, attn_map
+
