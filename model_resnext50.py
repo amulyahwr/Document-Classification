@@ -56,6 +56,6 @@ class DocClassification3DAttention(nn.Module):
         zn = torch.sum(torch.sum(attn_map * U, dim=-1), dim=-1)
         zn = torch.squeeze(zn, dim=1)
         fc = torch.relu(self.fc(zn))
-        out = torch.softmax(self.out(fc), dim=-1)
+        out = self.out(fc)
         
         return out, attn_map
